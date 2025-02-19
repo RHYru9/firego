@@ -69,7 +69,13 @@ func main() {
 }
 
 func scanDomain(domain string) (int, bool) {
-	url := fmt.Sprintf("https://%s/testing.json", domain)
+	var url string
+	if strings.HasPrefix(domain, "https://") || strings.HasPrefix(domain, "http://") {
+		url = fmt.Sprintf("%s/testing.json", domain)
+	} else {
+		url = fmt.Sprintf("https://%s/testing.json", domain)
+	}
+
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Printf("Error checking %s: %v\n", domain, err)
@@ -109,7 +115,13 @@ func printStatus(domain string, statusCode int, isVulnerable bool) {
 }
 
 func exploit(domain string, data ExploitData) {
-	url := fmt.Sprintf("https://%s/pwnd.json", domain)
+	var url string
+	if strings.HasPrefix(domain, "https://") || strings.HasPrefix(domain, "http://") {
+		url = fmt.Sprintf("%s/pwnd.json", domain)
+	} else {
+		url = fmt.Sprintf("https://%s/pwnd.json", domain)
+	}
+
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		fmt.Printf("Error marshalling JSON for %s: %v\n", domain, err)
