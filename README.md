@@ -21,7 +21,8 @@ Run FireGo with a list of Firebase domains:
 ```sh
 firego -l firebase_list.txt
 ```
-### Video
+### Demo
+[![asciicast](https://asciinema.org/a/b67veNLmI301TuHs8UcPGZElU.svg)](https://asciinema.org/a/b67veNLmI301TuHs8UcPGZElU)
 
 ### License  
 [https://creativecommons.org/licenses/by/4.0/](https://creativecommons.org/licenses/by/4.0/)  
