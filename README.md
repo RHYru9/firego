@@ -15,14 +15,16 @@ Ensure Go is installed, then run:
 go install github.com/rhyru9/firego@latest
 ```
 
+
 ### Usage  
 Run FireGo with a list of Firebase domains:  
 
 ```sh
 firego -l firebase_list.txt
 ```
+
 ### Demo
-[![asciicast](https://asciinema.org/a/b67veNLmI301TuHs8UcPGZElU.svg)](https://asciinema.org/a/b67veNLmI301TuHs8UcPGZElU)
+![demo](https://github.com/user-attachments/assets/f41289f2-f3f1-47c5-8893-bb1c6ddb6c06)
 
 ### License  
 [https://creativecommons.org/licenses/by/4.0/](https://creativecommons.org/licenses/by/4.0/)  
